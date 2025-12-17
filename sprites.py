@@ -42,24 +42,20 @@ class FloatingText(pygame.sprite.Sprite):
                  color: tuple[int, int, int] | str) -> None:
         super().__init__(groups)
 
-        # 1. Konfiguracja czcionki
         try:
             font = pygame.font.Font(MAIN_FONT, 20)
         except FileNotFoundError:
             font = pygame.font.Font(None, 20)
 
-        # 2. Tworzenie obrazka z tekstem
         self.image = font.render(text, True, color)
         self.rect = self.image.get_rect(midbottom=pos)
 
-        # 3. Fizyka
         self.pos = pygame.math.Vector2(self.rect.center)
         self.velocity = pygame.math.Vector2(0, -60)
 
         self.timer = 0
         self.lifespan = 800
 
-        # Ustawiamy warstwę na 'main', żeby kamera to narysowała
         self.z = LAYERS['main']
 
     def update(self, dt: float) -> None:
@@ -70,12 +66,10 @@ class FloatingText(pygame.sprite.Sprite):
             self.kill()
 
 
-# --- KLASA GRACZA ---
 class Player(Entity):
     def __init__(self, group: pygame.sprite.Group, obstacles: pygame.sprite.Group) -> None:
         super().__init__(group)
 
-        # Zapamiętujemy grupę rysującą (Kamerę)
         self.display_group = group
 
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
@@ -123,20 +117,16 @@ class Player(Entity):
 
     def get_damage(self, amount: int | float) -> None:
         if self.vulnerable:
-            # 1. Oblicz pancerz
             total_def = self.get_total_armor()
 
-            # 2. Oblicz faktyczne obrażenia
             actual_damage = amount - total_def
             if actual_damage < 1:
                 actual_damage = 1
 
-            # 3. Odejmij życie
             self.stats['health'] -= actual_damage
             self.vulnerable = False
             self.hurt_time = pygame.time.get_ticks()
 
-            # 4. Wyświetl tekst obrażeń
             FloatingText(
                 groups=[self.display_group],
                 pos=self.rect.midtop,
@@ -169,24 +159,18 @@ class Player(Entity):
         self.image.fill((0, 0, 0, 0))
         rotate_image, rotate_vector = self.rotate_weapon(self.weapon_hand, self.hit)
 
-        # A. Ciało
         self.image.blit(self.base_body_img, (0, 0))
-        # B. Zbroja
         if self.armor_body_img:
             self.image.blit(self.armor_body_img, (0, 0))
-        # C. Hełm
         if self.armor_head_img:
             self.image.blit(self.armor_head_img, (0, 0))
-        # D. Broń
         self.image.blit(rotate_image, rotate_vector)
-        # E. Tarcza
         if self.armor_shield_img:
             shield_surf = self.armor_shield_img
             if self.weapon_hand == 'right':
                 shield_surf = pygame.transform.flip(shield_surf, True, False)
             self.image.blit(shield_surf, (0, 0))
 
-        # Efekt zranienia (czerwony)
         if not self.vulnerable:
             tint_surf = pygame.Surface(self.image.get_size()).convert_alpha()
             tint_surf.fill((255, 0, 0, 0))
@@ -246,7 +230,6 @@ class Player(Entity):
         self.setup_graphics()
 
 
-# --- KLASA MONETY ---
 class Coin(pygame.sprite.Sprite):
     def __init__(self, groups: list[pygame.sprite.Group] | pygame.sprite.Group, pos: tuple[int, int]) -> None:
         super().__init__(groups)

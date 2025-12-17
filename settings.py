@@ -95,18 +95,14 @@ ARMORS = {
     }
 }
 
-# settings.py
-
 COIN_DATA = {
     'amount': 100,
     'image': 'sprites/coin.png',
-    'frames': 7,     # Ilość klatek łącznie
-    'cols': 3,       # Ilość kolumn w obrazku
-    'scale': 2,      # Powiększenie (np. 2x większa moneta)
-    'speed': 6       # Szybkość animacji (klatki na sekundę)
+    'frames': 7,
+    'cols': 3,
+    'scale': 2,
+    'speed': 6
 }
-# Statystyki przeciwników
-# settings.py
 
 ENEMY_DATA = {
     'ghoul': {
@@ -125,23 +121,23 @@ ENEMY_DATA = {
         'health': 60,
         'damage': 10,
         'attack_type': 'slash',
-        'speed': 250,  # Szybszy!
+        'speed': 250,
         'resistance': 1,
         'attack_radius': 50,
-        'notice_radius': 500, # Widzi z daleka
+        'notice_radius': 500,
         'attack_cooldown': 600,
-        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Skeleton/Skeleton.gif', # Zmień ścieżkę jeśli masz
+        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Skeleton/Skeleton.gif',
     },
 
     'ogre': {
         'health': 300,
         'damage': 40,
         'attack_type': 'slam',
-        'speed': 80,   # Bardzo wolny
+        'speed': 80,
         'resistance': 5,
         'attack_radius': 80,
         'notice_radius': 300,
         'attack_cooldown': 2000,
-        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Sand Ghoul/SandGhoul.gif', # Placeholder
+        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Sand Ghoul/SandGhoul.gif',
     }
 }

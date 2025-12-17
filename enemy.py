@@ -9,7 +9,7 @@ class Enemy(Entity):
         super().__init__(groups)
         self.all_sprites_ref = groups[0]
 
-        # 1. Grafika i Ustawienia
+
         enemy_info = ENEMY_DATA['ghoul']
         try:
             full_image = pygame.image.load(enemy_info['image']).convert_alpha()
@@ -23,7 +23,6 @@ class Enemy(Entity):
         self.hitbox = self.rect.inflate(-10, -26)
         self.z = LAYERS['main']
 
-        # 2. Ruch i Fizyka
         self.speed = enemy_info['speed']
         self.pos = pygame.math.Vector2(self.rect.center)
         self.velocity = pygame.math.Vector2(0, 0)
@@ -32,7 +31,6 @@ class Enemy(Entity):
         self.player = player
         self.notice_radius = enemy_info['notice_radius']
 
-        # 3. Statystyki
         self.health = enemy_info['health']
         self.max_health = self.health
         self.attack_damage = enemy_info['damage']
@@ -45,9 +43,7 @@ class Enemy(Entity):
         self.invincibility_duration = 400
         self.coin_group = coin_group
 
-        # --- NOWOŚĆ: Zmienna do zapamiętania kierunku odrzutu ---
         self.knockback_direction = pygame.math.Vector2(0, 0)
-        # --------------------------------------------------------
 
     def apply_health_color(self):
         self.image = self.original_image.copy()
@@ -77,19 +73,14 @@ class Enemy(Entity):
             self.vulnerable = False
             self.hit_time = pygame.time.get_ticks()
 
-            # --- FIX ODRZUTU: Obliczamy kierunek RAZ w momencie uderzenia ---
-            # Wektor: Pozycja Wroga - Pozycja Gracza = Wektor "OD GRACZA"
             enemy_vec = self.pos
-            player_vec = player.pos  # Używamy pozycji przekazanego gracza
+            player_vec = player.pos
             knockback_vec = enemy_vec - player_vec
 
             if knockback_vec.length() > 0:
                 self.knockback_direction = knockback_vec.normalize()
             else:
-                # Sytuacja awaryjna: jeśli stoją idealnie na sobie (length=0),
-                # wyrzucamy wroga losowo w prawo lub w górę, żeby nie stał w miejscu.
                 self.knockback_direction = pygame.math.Vector2(1, 0)
-            # ----------------------------------------------------------------
 
             if self.health <= 0:
                 Coin([self.all_sprites_ref, self.coin_group], self.rect.center)
@@ -117,10 +108,7 @@ class Enemy(Entity):
         distance, direction = self.get_player_distance_direction()
 
         if not self.vulnerable:
-            # --- FIX: Używamy zapamiętanego wektora zamiast liczyć go na bieżąco ---
-            # Dzięki temu kierunek jest stały przez całe 0.4s odrzutu
             self.velocity = self.knockback_direction * self.speed
-            # -----------------------------------------------------------------------
         elif distance < self.notice_radius:
             self.velocity = direction
         else:

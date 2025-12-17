@@ -34,11 +34,10 @@ class Game:
         self.player_obstacles: pygame.sprite.Group = None
         self.enemy_obstacles: pygame.sprite.Group = None
 
-        self.player: Player = None  # type: ignore
-        self.upgrade_menu: UpgradeMenu = None  # type: ignore
-        self.hud: HUD = None  # type: ignore
+        self.player: Player = None
+        self.upgrade_menu: UpgradeMenu = None
+        self.hud: HUD = None
 
-        # Stan gry
         self.game_paused: bool = False
         self.game_over: bool = False
 
@@ -46,7 +45,6 @@ class Game:
         self.new_game()
 
     def new_game(self) -> None:
-        # 1. Resetujemy flagi
         self.game_over = False
         self.game_paused = False
 
@@ -58,14 +56,11 @@ class Game:
         self.player_obstacles = pygame.sprite.Group()
         self.enemy_obstacles = pygame.sprite.Group()
 
-        # 3. Tworzymy gracza
         self.player = Player(self.all_sprites, self.player_obstacles)
         self.enemy_obstacles.add(self.player)
 
-        # 4. Ładujemy mapę
         self.create_map_tmx()
 
-        # 5. Resetujemy UI i HUD (muszą dostać NOWEGO gracza)
         self.upgrade_menu = UpgradeMenu(self.player)
         self.hud = HUD(self.player)
 
@@ -99,7 +94,6 @@ class Game:
                     elif layer.name == 'Floor':
                         Tile(self.all_sprites, pos, surf)
 
-                        # Spawnowanie wrogów (szansa 2%)
                         if random.randint(0, 100) < 2:
                             dist_x = abs(x * TILE_SIZE - WIDTH / 2)
                             dist_y = abs(y * TILE_SIZE - HEIGHT / 2)
@@ -117,7 +111,7 @@ class Game:
         if self.enemy_sprites:
             for sprite in self.enemy_sprites:
 
-                enemy: Enemy = sprite  # type: ignore
+                enemy: Enemy = sprite
 
                 distance = enemy.pos.distance_to(self.player.pos)
                 if distance < 80:
@@ -125,7 +119,6 @@ class Game:
 
     def run(self) -> None:
         while self.running:
-            # dt w sekundach
             dt: float = self.clock.tick(FPS) / 1000
             self.events()
 
@@ -134,7 +127,6 @@ class Game:
                 self.draw_game_over_screen()
 
             elif self.game_paused:
-                # Jeśli pauza, rysujemy menu
                 self.upgrade_menu.display()
                 self.upgrade_menu.input()
                 if self.upgrade_menu.should_close:
@@ -145,7 +137,6 @@ class Game:
                 pygame.display.flip()
 
             else:
-                # Normalna gra
                 self.update(dt)
                 self.draw()
 
@@ -162,12 +153,10 @@ class Game:
 
                     if event.key == pygame.K_SPACE:
                         self.new_game()
-                    # ESC wyłącza grę
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
-                    return  # Nie przetwarzamy innych klawiszy (ruchu itp.)
+                    return
 
-                # --- STEROWANIE W TRAKCIE GRY ---
                 if event.key == pygame.K_LEFT:
                     if self.player.weapon_hand == 'left':
                         self.player.weapon_img = pygame.transform.flip(self.player.weapon_img, True, False)
@@ -193,7 +182,6 @@ class Game:
     def update(self, dt: float) -> None:
         self.all_sprites.update(dt)
 
-        # Zbieranie monet
         collected_coins = pygame.sprite.spritecollide(self.player, self.coin_sprites, True)
 
         for coin in collected_coins:
@@ -202,15 +190,14 @@ class Game:
 
 
             FloatingText(
-                groups=[self.all_sprites],  # Dodajemy do kamery
+                groups=[self.all_sprites],
                 pos=self.player.rect.midtop,
                 text=f"+{amount}",
-                color=(255, 215, 0)  # Złoty
+                color=(255, 215, 0)
             )
 
             print(f"Podniesiono monetę! Złoto: {self.player.money}")
 
-        # Sprawdzanie śmierci...
         if self.player.stats['health'] <= 0:
             self.game_over = True
 
@@ -220,15 +207,12 @@ class Game:
         self.hud.display()
         pygame.display.flip()
 
-    # --- RYSOWANIE EKRANU GAME OVER ---
     def draw_game_over_screen(self) -> None:
         self.screen.fill(BLACK)
 
-        # Tekst GAME OVER
         game_over_surf = self.font_big.render("GAME OVER", True, (180, 0, 0))
         game_over_rect = game_over_surf.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 50))
 
-        # Tekst Instrukcji
         restart_surf = self.font_small.render("Wcisnij SPACJE aby sprobowac ponownie", True, (255, 255, 255))
         restart_rect = restart_surf.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
 
