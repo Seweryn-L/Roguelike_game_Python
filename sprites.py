@@ -4,7 +4,7 @@ from entity import Entity
 from support import SpriteSheet
 
 
-# Dodajemy typy do argumentów i wartości zwracanych
+
 def get_input_direction(keys: pygame.key.ScancodeWrapper) -> pygame.math.Vector2:
     direction = pygame.math.Vector2(0, 0)
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:

@@ -27,16 +27,12 @@ class Game:
             self.font_big = pygame.font.Font(None, 100)
             self.font_small = pygame.font.Font(None, 40)
 
-        # --- FIX: Definiujemy zmienne tutaj, żeby IDE nie krzyczało ---
-        # Przypisujemy im None, ale typujemy jako właściwe klasy.
-        # Używamy # type: ignore, żeby linter nie marudził na None.
-
-        self.all_sprites: Camera = None  # type: ignore
-        self.wall_sprites: pygame.sprite.Group = None  # type: ignore
-        self.enemy_sprites: pygame.sprite.Group = None  # type: ignore
-        self.coin_sprites: pygame.sprite.Group = None  # type: ignore
-        self.player_obstacles: pygame.sprite.Group = None  # type: ignore
-        self.enemy_obstacles: pygame.sprite.Group = None  # type: ignore
+        self.all_sprites: Camera = None
+        self.wall_sprites: pygame.sprite.Group = None
+        self.enemy_sprites: pygame.sprite.Group = None
+        self.coin_sprites: pygame.sprite.Group = None
+        self.player_obstacles: pygame.sprite.Group = None
+        self.enemy_obstacles: pygame.sprite.Group = None
 
         self.player: Player = None  # type: ignore
         self.upgrade_menu: UpgradeMenu = None  # type: ignore
@@ -46,16 +42,15 @@ class Game:
         self.game_paused: bool = False
         self.game_over: bool = False
 
-        # --- Wywołujemy metodę, która tworzy świat i nadpisuje powyższe None ---
+
         self.new_game()
 
-    # --- Metoda: Tworzenie/Resetowanie świata ---
     def new_game(self) -> None:
         # 1. Resetujemy flagi
         self.game_over = False
         self.game_paused = False
 
-        # 2. Tworzymy grupy od nowa (czyścimy stary świat)
+
         self.all_sprites = Camera()
         self.wall_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
@@ -75,7 +70,7 @@ class Game:
         self.hud = HUD(self.player)
 
     def create_map_tmx(self) -> None:
-        # Zakładam, że MAP1 jest zdefiniowane w settings.py, jeśli nie - level1.tmx
+
         map_name = 'level1.tmx' if 'MAP1' not in globals() else MAP1
 
         try:
@@ -87,7 +82,7 @@ class Game:
         map_pixel_width = tmx_data.width * TILE_SIZE
         map_pixel_height = tmx_data.height * TILE_SIZE
 
-        # Przekazujemy limity do kamery
+
         self.all_sprites.set_limits(map_pixel_width, map_pixel_height)
 
         for layer in tmx_data.visible_layers:
@@ -96,8 +91,7 @@ class Game:
                     pos = (x * TILE_SIZE, y * TILE_SIZE)
 
                     if layer.name == 'Walls':
-                        # Przekazujemy listę grup. Linter może tu ostrzegać o typach,
-                        # ale w Pythonie jest to poprawne (Duck Typing).
+
                         wall = Wall([self.all_sprites, self.wall_sprites], pos, surf)
                         self.player_obstacles.add(wall)
                         self.enemy_obstacles.add(wall)
@@ -122,7 +116,7 @@ class Game:
     def player_attack_logic(self) -> None:
         if self.enemy_sprites:
             for sprite in self.enemy_sprites:
-                # Rzutujemy sprite na Enemy, żeby IDE wiedziało, że ma metodę get_damage
+
                 enemy: Enemy = sprite  # type: ignore
 
                 distance = enemy.pos.distance_to(self.player.pos)
@@ -135,9 +129,8 @@ class Game:
             dt: float = self.clock.tick(FPS) / 1000
             self.events()
 
-            # --- LOGIKA RYSOWANIA I AKTUALIZACJI ---
             if self.game_over:
-                # Jeśli koniec gry, rysujemy tylko ekran śmierci
+
                 self.draw_game_over_screen()
 
             elif self.game_paused:
@@ -164,9 +157,9 @@ class Game:
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
-                # --- OBSŁUGA GAME OVER ---
+
                 if self.game_over:
-                    # Spacja restartuje grę
+
                     if event.key == pygame.K_SPACE:
                         self.new_game()
                     # ESC wyłącza grę
@@ -207,7 +200,7 @@ class Game:
             amount = COIN_DATA['amount']
             self.player.money += amount
 
-            # --- Wyświetlanie złota ---
+
             FloatingText(
                 groups=[self.all_sprites],  # Dodajemy do kamery
                 pos=self.player.rect.midtop,
