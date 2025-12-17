@@ -1,0 +1,147 @@
+WIDTH = 1280
+HEIGHT = 720
+FPS = 60
+TITLE = "Knight vs Sceletors"
+MAP1 = "level1.tmx"
+
+MAIN_FONT = 'fonts/Ac437_IBM_BIOS.ttf'
+PLAYER_CHARACTER = "sprites/character/Spritesheet/roguelikeChar_transparent.png"
+BLACK = (0, 0, 0)
+DARK_GREY = (40, 40, 40)
+
+ORIGINAL_TILE_SIZE = 16
+SCALE_FACTOR = 3  # Zmienione z 1 na 4 dla lepszej widoczności
+TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE_FACTOR  # 64px
+
+MAP_WIDTH = 4000
+MAP_HEIGHT = 4000
+
+PLAYER_START_POS = (400, 400)
+PLAYER_SIZE = 16  # Zmienione z 16 na 64 (dopasowane do TILE_SIZE)
+
+HAND_POS = {
+    'left': (0, 0),
+    'right': (32, 0),
+}
+
+PLAYER_ASSETS = {
+    'body': (0, 0)  # Zwykły ludzik
+}
+LAYERS = {
+    'floor': 0,
+    'main': 1  # Tutaj będą ściany, gracz, wrogowie
+}
+
+WEAPONS = {
+    'short_sword': {
+        'name': 'short sword',
+        'damage': 1,
+        'cost': 100,
+        'range': 1,
+        'id': (45, 7)
+    },
+    'axe': {
+        'name': 'axe',
+        'damage': 2,
+        'range': 1,
+        'cost': 200,
+        'id': (48, 7)
+    },
+    'long_sword': {
+        'name': 'long sword',
+        'damage': 5,
+        'range': 1,
+        'cost': 500,
+        'id': (45, 6)
+    },
+    'pique': {
+        'name': 'pique',
+        'damage': 5,
+        'range': 2,
+        'cost': 1000,
+        'id': (47, 5)
+    }
+
+}
+
+ARMORS = {
+    'Leather': {
+        'name': 'Leather Armor',
+        'defense': 5,
+        'cost': 0,
+        'slot': 'body',  # <--- NOWOŚĆ: To idzie na ciało
+        'id': (6, 0)
+    },
+    'steel': {
+        'name': 'Steel Armor',
+        'defense': 10,
+        'cost': 300,
+        'slot': 'body',  # <--- To też idzie na ciało (zamieni Leather)
+        'id': (12, 4)
+    },
+    'helmet': {
+        'name': 'Helmet',
+        'defense': 5,
+        'cost': 600,
+        'slot': 'head',  # <--- To idzie na głowę (nie zdejmie Leather)
+        'id': (30, 0)
+    },
+    'shield': {
+        'name': 'Shield',
+        'defense': 15,
+        'cost': 1500,
+        'slot': 'shield',  # <--- To idzie do ręki
+        'id': (40, 0)
+    }
+}
+
+# settings.py
+
+COIN_DATA = {
+    'amount': 100,
+    'image': 'sprites/coin.png',
+    'frames': 7,     # Ilość klatek łącznie
+    'cols': 3,       # Ilość kolumn w obrazku
+    'scale': 2,      # Powiększenie (np. 2x większa moneta)
+    'speed': 6       # Szybkość animacji (klatki na sekundę)
+}
+# Statystyki przeciwników
+# settings.py
+
+ENEMY_DATA = {
+    'ghoul': {
+        'health': 100,
+        'damage': 20,
+        'attack_type': 'slash',
+        'speed': 150,
+        'resistance': 3,
+        'attack_radius': 60,
+        'notice_radius': 400,
+        'attack_cooldown': 1000,
+        'image': 'sprites/SandGhoul.gif',
+    },
+    # --- NOWY PRZECIWNIK: SZKIELET (Szybki, mało HP) ---
+    'skeleton': {
+        'health': 60,
+        'damage': 10,
+        'attack_type': 'slash',
+        'speed': 250,  # Szybszy!
+        'resistance': 1,
+        'attack_radius': 50,
+        'notice_radius': 500, # Widzi z daleka
+        'attack_cooldown': 600, # Częstsze ataki
+        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Skeleton/Skeleton.gif', # Zmień ścieżkę jeśli masz
+    },
+    # --- NOWY PRZECIWNIK: OGR (Wolny, dużo HP, mocno bije) ---
+    'ogre': {
+        'health': 300,
+        'damage': 40,
+        'attack_type': 'slam',
+        'speed': 80,   # Bardzo wolny
+        'resistance': 5,
+        'attack_radius': 80,
+        'notice_radius': 300,
+        'attack_cooldown': 2000,
+        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Sand Ghoul/SandGhoul.gif', # Placeholder
+    }
+}
