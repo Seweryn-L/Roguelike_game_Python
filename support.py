@@ -6,7 +6,6 @@ class SpriteSheet:
         try:
             self.sheet = pygame.image.load(filename).convert_alpha()
         except FileNotFoundError:
-            print(f"BŁĄD: Nie znaleziono pliku {filename}")
             raise SystemExit
 
     def get_image(self, col, row, width=16, height=16, scale=1):

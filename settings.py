@@ -126,7 +126,7 @@ ENEMY_DATA = {
         'attack_radius': 50,
         'notice_radius': 500,
         'attack_cooldown': 600,
-        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Skeleton/Skeleton.gif',
+        'image': 'sprites/SandGhoul.gif',
     },
 
     'ogre': {
@@ -139,5 +139,15 @@ ENEMY_DATA = {
         'notice_radius': 300,
         'attack_cooldown': 2000,
         'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Sand Ghoul/SandGhoul.gif',
+    }
+}
+
+PROJECTILE_DATA = {
+    'acid': {
+        'speed': 400,
+        'damage': 15,
+        'radius': 8,
+        'color': (50, 255, 50),
+        'lifetime': 1500
     }
 }

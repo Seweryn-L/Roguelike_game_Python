@@ -71,7 +71,6 @@ class Game:
         try:
             tmx_data = pytmx.util_pygame.load_pygame(map_name)
         except FileNotFoundError:
-            print(f"BŁĄD: Nie znaleziono pliku '{map_name}'")
             sys.exit()
 
         map_pixel_width = tmx_data.width * TILE_SIZE

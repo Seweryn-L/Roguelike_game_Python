@@ -134,7 +134,7 @@ class Player(Entity):
                 color=(255, 0, 0)
             )
 
-            print(f"Auć! Dostałeś za {actual_damage}")
+
 
     def get_total_armor(self) -> int:
         total_def = 0
@@ -255,7 +255,6 @@ class Coin(pygame.sprite.Sprite):
                 self.frames.append(img)
 
         except Exception as e:
-            print(f"Błąd monety: {e}")
             self.image = pygame.Surface((20, 20))
             self.image.fill('yellow')
 

@@ -1,7 +1,5 @@
 import pygame
 from settings import *
-
-
 class UpgradeMenu:
     def __init__(self, player):
         self.player = player
@@ -16,7 +14,7 @@ class UpgradeMenu:
         self.state = 'main'
 
         self.menu_options = [
-            {'name': 'stats_menu', 'label': '> ULEPSZ STATYSTYKI'},
+            {'name': 'stats_menu', 'label': '> UPGRADE STATS'},
             {'name': 'weapon_menu', 'label': '> SKLEP Z BRONIA'},
             {'name': 'armor_menu', 'label': '> SKLEP Z PANCERZEM'},
             {'name': 'exit', 'label': '> WYJDZ Z MENU'}
@@ -215,7 +213,12 @@ class UpgradeMenu:
         for index, item in enumerate(options):
             name = item['name']
             color = (255, 255, 255)
-            if index == self.selection_index:
-                color = (255, 215, 0)
-
-            is_owned = False
+            for index, item in enumerate(options):
+                color = (255, 215, 0) if index == self.selection_index else (255, 255, 255)
+                label = item['label']
+                if 'cost' in item and item['cost'] > 0:
+                    label += f" - Koszt: {item['cost']}"
+                option_surf = self.font.render(label, True, color)
+                x = WIDTH // 2 - option_surf.get_width() // 2
+                y = 250 + (index * 60)
+                self.display_surface.blit(option_surf, (x, y))
