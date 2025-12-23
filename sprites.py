@@ -1,5 +1,5 @@
 import pygame
-from typing import List, Optional, Union, Sequence
+from typing import List, Optional, Union, Sequence, Callable
 
 from settings import *
 from entity import Entity
@@ -110,10 +110,10 @@ class Player(Entity):
 
         self.rect = self.image.get_rect(center=PLAYER_START_POS)
         self.hitbox = self.rect.inflate(-10, -26)
-        self.speed = 300
+        self.speed = 200
         self.pos = pygame.math.Vector2(PLAYER_START_POS)
-        self.money: int = 10000
-        self.stats: Dict[str, int] = {'health': 100, 'attack': 10, 'speed': 300}
+        self.money: int = 0
+        self.stats: Dict[str, int] = {'health': 100, 'attack': 9, 'speed': 300}
         self.vulnerable: bool = True
         self.hurt_time: int = 0
         self.invincibility_duration: int = 500
@@ -433,12 +433,13 @@ class Player(Entity):
 
 
 class Coin(pygame.sprite.Sprite):
-    def __init__(self, groups: List[pygame.sprite.Group], pos: Tuple[int, int]) -> None:
+    def __init__(self, groups: List[pygame.sprite.Group], pos: Tuple[int, int],value: int) -> None:
         super().__init__(groups)
 
         self.frames: List[pygame.Surface] = []
         self.frame_index: float = 0
         self.animation_speed: float = COIN_DATA['speed']
+        self.value = value
 
         try:
             ss = SpriteSheet(COIN_DATA['image'])
@@ -611,20 +612,20 @@ class Door(pygame.sprite.Sprite):
 
 class Chest(pygame.sprite.Sprite):
     def __init__(self, groups: List[pygame.sprite.Group], pos: Tuple[int, int],
-                 obstacles_group: pygame.sprite.Group, sprite_sheet: SpriteSheet) -> None:
+                 obstacles_group: pygame.sprite.Group, sprite_sheet: SpriteSheet,
+                 on_open: Callable[['Player', pygame.math.Vector2, List[pygame.sprite.Group]], None]) -> None:
         super().__init__(groups)
 
         self.closed_image = sprite_sheet.get_image(*CHEST_CONFIG['closed'], scale=SCALE_FACTOR)
         self.open_image = sprite_sheet.get_image(*CHEST_CONFIG['open'], scale=SCALE_FACTOR)
-
         self.image = self.closed_image
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -10)
-
         self.z = LAYERS['main']
 
         self.is_open = False
-        self.amount = CHEST_CONFIG['amount']
+
+        self.on_open_callback = on_open
 
         self.obstacles_group = obstacles_group
         self.obstacles_group.add(self)
@@ -633,10 +634,8 @@ class Chest(pygame.sprite.Sprite):
         if not self.is_open:
             self.is_open = True
             self.image = self.open_image
-
-            player.money += self.amount
-
-            FloatingText(self.groups(), self.rect.midtop, f"+{self.amount} Gold", (255, 215, 0))
+            if self.on_open_callback:
+                self.on_open_callback(player, self.rect.midtop, self.groups())
 
             if hasattr(player, 'coin_sound') and player.coin_sound:
                 player.coin_sound.play()

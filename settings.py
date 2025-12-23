@@ -1,5 +1,7 @@
+import pygame
 from dataclasses import dataclass
 from typing import Tuple, Dict, Final
+from enum import IntEnum
 
 WIDTH: Final[int] = 1280
 HEIGHT: Final[int] = 720
@@ -7,35 +9,38 @@ FPS: Final[int] = 60
 TITLE: Final[str] = "Knight vs Sceletors"
 DEFAULT_MAP: Final[str] = "level2.tmx"
 
-MAIN_FONT: Final[str] = 'fonts/Ac437_IBM_BIOS.ttf'
-PLAYER_CHARACTER: Final[str] = "sprites/character/Spritesheet/roguelikeChar_transparent.png"
-
-DOOR_CONFIG = {
-    'left': {
-        'open': (28, 8),
-        'closed': (28, 7)
-    },
-    'right': {
-        'open': (29, 8),
-        'closed': (29, 7)
-    }
-}
-
 BLACK: Final[Tuple[int, int, int]] = (0, 0, 0)
-DARK_GREY: Final[Tuple[int, int, int]] = (40, 40, 40)
+MAIN_FONT: Final[str] = 'fonts/Ac437_IBM_BIOS.ttf'
 
 ORIGINAL_TILE_SIZE: Final[int] = 16
 SCALE_FACTOR: Final[int] = 3
 TILE_SIZE: Final[int] = ORIGINAL_TILE_SIZE * SCALE_FACTOR
 
-MAP_WIDTH: int = 4000
-MAP_HEIGHT: int = 4000
+MAP_WIDTH: Final[int] = 4000
+MAP_HEIGHT: Final[int] = 4000
+
+
+class Layer(IntEnum):
+    FLOOR = 0
+    MAIN = 1
+    OVERHEAD_ALWAYS = 2
+    DOORS = 3
+
+LAYERS = {
+    'floor': Layer.FLOOR,
+    'main': Layer.MAIN,
+    'overhead_always': Layer.OVERHEAD_ALWAYS,
+    'doors': Layer.DOORS
+}
 
 PLAYER_START_POS: Tuple[int, int] = (400, 400)
+PLAYER_CHARACTER: Final[str] = "sprites/character/Spritesheet/roguelikeChar_transparent.png"
+PLAYER_ASSETS = {'body': (0, 0)}
 
 ARROW_COST: int = 50
 ARROW_BUNDLE: int = 10
 BOW_INITIAL_ARROWS: int = 20
+
 
 
 @dataclass(frozen=True)
@@ -71,6 +76,7 @@ class EnemyData:
     notice_radius: int
     attack_cooldown: int
     image: str
+    gold_drop: int
     projectile_type: str = 'None'
 
 @dataclass(frozen=True)
@@ -82,12 +88,17 @@ class ProjectileData:
     lifetime: int
     scale: float = SCALE_FACTOR
 
+
 WEAPONS: Dict[str, WeaponData] = {
-    'short_sword': WeaponData('short sword', 1, 100, 1, (45, 7)),
-    'axe': WeaponData('axe', 2, 200, 1, (48, 7)),
-    'long_sword': WeaponData('long sword', 5, 500, 2, (45, 6)),
-    'pique': WeaponData('pique', 5, 1000, 3, (47, 5)),
-    'bow' : WeaponData('bow',20,1000,-1,(0,0 ),"sprites/Bow and Arrows.png", scale=2, offset=(8,8),rotates_to_mouse=True)
+    'short_sword': WeaponData('short sword', 1, 0, 1, (45, 7)),
+    'axe': WeaponData('axe', 3, 250, 1, (48, 7)),
+    'long_sword': WeaponData('long sword', 6, 600, 2, (45, 6)),
+    'pique': WeaponData('pique', 5, 1200, 3, (47, 5)),
+    'bow': WeaponData(
+        name='bow', damage=12, cost=1500, range=-1,
+        id=(0, 0), graphic_path="sprites/Bow and Arrows.png",
+        scale=2, offset=(8, 8), rotates_to_mouse=True
+    )
 }
 
 PROJECTILES: Dict[str, ProjectileData] = {
@@ -110,52 +121,55 @@ PROJECTILES: Dict[str, ProjectileData] = {
 }
 
 ARMORS: Dict[str, ArmorData] = {
-    'Leather': ArmorData('Leather Armor', 5, 0, 'body', (6, 0)),
-    'steel': ArmorData('Steel Armor', 10, 300, 'body', (12, 4)),
-    'helmet': ArmorData('Helmet', 5, 600, 'head', (30, 0)),
-    'shield': ArmorData('Shield', 15, 1500, 'shield', (40, 0))
+    'Leather': ArmorData('Leather Armor', 3, 150, 'body', (6, 0)),
+    'steel': ArmorData('Steel Armor', 8, 800, 'body', (12, 4)),
+    'helmet': ArmorData('Helmet', 3, 400, 'head', (30, 0)),
+    'shield': ArmorData('Shield', 10, 1000, 'shield', (40, 0))
 }
 
 ENEMY_DATA: Dict[str, EnemyData] = {
-    'ghoul': EnemyData(100, 20, 'slash', 150, 3, 60, 400, 1000, 'sprites/SandGhoul.gif'),
+    'ghoul': EnemyData(
+        health=100, damage=15, attack_type='slash', speed=160, resistance=3,
+        attack_radius=60, notice_radius=400, attack_cooldown=1000,
+        image='sprites/SandGhoul.gif',
+        gold_drop=40,
+        projectile_type='None'
+    ),
     'skeleton': EnemyData(
-        health=50,
-        damage=10,
-        attack_type='projectile',
-        speed=100,
-        resistance=1,
-        attack_radius=250,
-        notice_radius=500,
-        attack_cooldown=2000,
+        health=60, damage=10, attack_type='projectile', speed=110, resistance=1,
+        attack_radius=250, notice_radius=550, attack_cooldown=2000,
         image='sprites/BrittleArcher.gif',
+        gold_drop=50,
         projectile_type='arrow'
     ),
     'ghastlyEye': EnemyData(
-        health=20,
-        damage=5,
-        attack_type='projectile',
-        speed=150,
-        resistance=1,
-        attack_radius=250,
-        notice_radius=700,
-        attack_cooldown=1000,
+        health=30, damage=5, attack_type='projectile', speed=140, resistance=1,
+        attack_radius=250, notice_radius=700, attack_cooldown=1000,
         image='sprites/GhastlyEye.gif',
+        gold_drop=30,
         projectile_type='venom'
     )
 }
 
-LAYERS = {
-    'floor': 0,
-    'main': 1,
-    'overhead_always': 2,
-    'doors': 3
+DOOR_CONFIG = {
+    'left': {'open': (28, 8), 'closed': (28, 7)},
+    'right': {'open': (29, 8), 'closed': (29, 7)}
 }
 
 CHEST_CONFIG = {
     'closed': (38, 10),
     'open': (38, 11),
-    'amount': 500
+    'amount': 200
 }
 
-COIN_DATA = {'amount': 100, 'image': 'sprites/coin.png', 'frames': 7, 'cols': 3, 'scale': 2, 'speed': 6}
-PLAYER_ASSETS = {'body': (0, 0)}
+COIN_DATA = {
+    'amount': 100, 
+    'image': 'sprites/coin.png', 
+    'frames': 7, 
+    'cols': 3, 
+    'scale': 2, 
+    'speed': 6
+}
+
+VICTORY_TEXT: Final[str] = "WYGRALES 5 z PJF"
+GOLD_COLOR: Final[Tuple[int, int, int]] = (255, 215, 0)

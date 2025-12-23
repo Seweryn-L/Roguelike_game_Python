@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="29">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="30">
  <tileset firstgid="1" source="../PROJEKT OSTATECZNY/mapka nice.tsx"/>
  <layer id="3" name="Floor" width="60" height="40">
   <data encoding="csv">
@@ -198,5 +198,6 @@
   <object id="26" name="chest" x="916" y="264"/>
   <object id="27" name="chest" x="912" y="572"/>
   <object id="28" name="chest" x="352" y="416"/>
+  <object id="29" name="special_chest" x="48" y="416"/>
  </objectgroup>
 </map>

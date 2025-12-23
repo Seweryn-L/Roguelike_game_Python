@@ -1,8 +1,7 @@
 import random
 import sys
 import pytmx
-import pygame
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 from settings import *
 from support import load_font, SpriteSheet
@@ -15,6 +14,7 @@ from sprites import Player, Wall, Tile, FloatingText, Door, Chest
 
 class Game:
     def __init__(self) -> None:
+
         pygame.init()
         self.screen: pygame.Surface = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -27,8 +27,6 @@ class Game:
             pygame.mixer.music.load('audio/Dungeon.wav')
             pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play(-1)
-
-            print("Muzyka wystartowała!")
         except Exception as e:
             print(f"Nie udało się załadować muzyki: {e}")
 
@@ -54,6 +52,7 @@ class Game:
 
         self.game_paused: bool = False
         self.game_over: bool = False
+        self.victory: bool = False
 
         self.new_game()
 
@@ -79,6 +78,7 @@ class Game:
         self.player.set_enemy_group(self.enemy_sprites)
 
         self.upgrade_menu = UpgradeMenu(self.player)
+        self.victory = False
         self.hud = HUD(self.player)
 
     def _create_floor(self, pos: Tuple[int, int], surf: pygame.Surface, x: int, y: int) -> None:
@@ -117,9 +117,44 @@ class Game:
             groups=[self.all_sprites, self.chest_sprites],
             pos=pos,
             obstacles_group=self.player_obstacles,
-            sprite_sheet=spritesheet
+            sprite_sheet=spritesheet,
+            on_open=self._on_normal_chest_open  # Przekazujemy funkcję!
         )
 
+    def _create_special_chest(self, obj: pytmx.TiledObject, pos: Tuple[int, int], spritesheet: SpriteSheet) -> None:
+        Chest(
+            groups=[self.all_sprites, self.chest_sprites],
+            pos=pos,
+            obstacles_group=self.player_obstacles,
+            sprite_sheet=spritesheet,
+            on_open=self._on_special_chest_open # Przekazujemy inną funkcję!
+        )
+
+    def draw_victory_screen(self) -> None:
+        self.screen.fill(BLACK)
+        words = VICTORY_TEXT.split(' ')
+        lines = []
+        current_line = []
+
+        for word in words:
+            current_line.append(word)
+            if len(" ".join(current_line)) > 20:
+                lines.append(" ".join(current_line))
+                current_line = []
+        if current_line:
+            lines.append(" ".join(current_line))
+        y_offset = HEIGHT / 2 - (len(lines) * 50)
+        for line in lines:
+            text_surf = self.font_big.render(line, True, GOLD_COLOR)
+            text_rect = text_surf.get_rect(center=(WIDTH / 2, y_offset))
+            self.screen.blit(text_surf, text_rect)
+            y_offset += 100
+
+        restart_surf = self.font_small.render("Press ESC to Restart", True, (255, 255, 255))
+        restart_rect = restart_surf.get_rect(center=(WIDTH / 2, HEIGHT - 100))
+        self.screen.blit(restart_surf, restart_rect)
+
+        pygame.display.flip()
 
     def create_map_tmx(self) -> None:
         map_name: str = DEFAULT_MAP
@@ -148,9 +183,9 @@ class Game:
         object_handlers: Dict[str, object_handler] = {
             'left': self._create_door,
             'right': self._create_door,
-            'chest': self._create_chest
+            'chest': self._create_chest,
+            'special_chest': self._create_special_chest  # <--- NOWY WPIS
         }
-
         for layer in tmx_data.visible_layers:
             # --- Obsługa Warstw Kafelkowych ---
             if isinstance(layer, pytmx.TiledTileLayer) and hasattr(layer, 'tiles'):
@@ -173,6 +208,17 @@ class Game:
 
                     if handler:
                         handler(obj, pos, map_spritesheet)
+
+
+    def _on_normal_chest_open(self, player, pos_rect: Tuple[int, int], groups: List[pygame.sprite.Group]) -> None:
+        amount = CHEST_CONFIG['amount']
+        player.money += amount
+        FloatingText(groups, pos_rect, f"+{amount} Gold", GOLD_COLOR)
+
+    def _on_special_chest_open(self, player, pos_rect: Tuple[int, int], groups: List[pygame.sprite.Group]) -> None:
+
+        self.victory = True
+
     def spawn_enemies_randomly(self, grid_x: int, grid_y: int, pos: tuple[int,int]) -> None:
         if random.randint(0, 100) < 2:
             dist_x = abs(grid_x * TILE_SIZE - WIDTH / 2)
@@ -195,8 +241,9 @@ class Game:
         while self.running:
             dt: float = self.clock.tick(FPS) / 1000.0
             self.events()
-
-            if self.game_over:
+            if self.victory:
+                self.draw_victory_screen()
+            elif self.game_over:
                 self.draw_game_over_screen()
             elif self.game_paused:
                 self.upgrade_menu.display()
@@ -233,7 +280,7 @@ class Game:
                         self.player.hit = False
 
     def handle_keydown(self, event: pygame.event.Event) -> None:
-        if self.game_over:
+        if self.game_over or self.victory:
             if event.key == pygame.K_ESCAPE:
                 self.new_game()
             return
@@ -248,7 +295,7 @@ class Game:
 
         collected_coins = pygame.sprite.spritecollide(self.player, self.coin_sprites, True)
         for coin in collected_coins:
-            amount = COIN_DATA['amount']
+            amount = coin.value
             if self.coin_sound:
                 self.coin_sound.play()
             self.player.money += amount

@@ -1,4 +1,3 @@
-import pygame
 from typing import List, Any, Callable, Optional
 from functools import partial
 
@@ -35,7 +34,7 @@ class UpgradeMenu:
 
         self.stats_options: List[Dict[str, Any]] = [
             {'name': 'health', 'cost': 50, 'increase': 20, 'label': 'Heal (+20 HP)'},
-            {'name': 'attack', 'cost': 100, 'increase': 5, 'label': 'Strength (+5 Atk)'},
+            {'name': 'attack', 'cost': 100, 'increase': 2, 'label': 'Strength (+2 Atk)'},
             {'name': 'speed', 'cost': 80, 'increase': 20, 'label': 'Speed (+20 Speed)'},
             {'name': 'back', 'cost': 0, 'increase': 0, 'label': '<<< BACK'}
         ]
@@ -54,34 +53,23 @@ class UpgradeMenu:
             print(f"UI Sound Error: {e}")
 
     def _init_dispatch_tables(self) -> None:
-        """Inicjalizuje mapowania akcji (podejście funkcyjne)."""
-
-        # 1. Mapa handlerów dla poszczególnych stanów (ekranów)
         self.state_handlers: Dict[str, Callable[[str, Dict[str, Any]], None]] = {
             'main': self._handle_main_state,
             'stats': self._handle_stats_state,
             'weapon': self._handle_weapon_state,
             'armor': self._handle_armor_state
         }
-
-        # 2. Mapa akcji dla Menu Głównego
         self.main_menu_actions: Dict[str, Callable[[], None]] = {
             'stats_menu': partial(self._switch_state, 'stats'),
             'weapon_menu': partial(self._switch_state, 'weapon'),
             'armor_menu': partial(self._switch_state, 'armor'),
             'exit': self._close_game_menu
         }
-
-        # 3. Mapa akcji dla Statystyk (używamy partial, by wstrzyknąć parametry)
-        # Uwaga: Koszt i przyrost bierzemy z definicji itemu w trigger,
-        # ale tutaj definiujemy LOGIKĘ modyfikacji.
         self.stats_actions: Dict[str, Callable[[int], None]] = {
             'health': lambda inc: self._modify_stat_dict('health', inc),
             'attack': lambda inc: self._modify_stat_dict('attack', inc),
             'speed': lambda inc: self._modify_attribute('speed', inc),
         }
-
-    # --- METODY POMOCNICZE DO ZMIANY STANU ---
 
     def _switch_state(self, new_state: str) -> None:
         self.state = new_state
@@ -94,8 +82,6 @@ class UpgradeMenu:
 
     def _go_back(self) -> None:
         self._switch_state('main')
-
-    # --- LOGIKA MODYFIKACJI GRACZA (PUREISH FUNCTIONS) ---
 
     def _modify_stat_dict(self, key: str, amount: int) -> None:
         self.player.stats[key] += amount
@@ -114,17 +100,14 @@ class UpgradeMenu:
             if self.error_sound: self.error_sound.play()
             return False
 
-    # --- GŁÓWNA METODA WYWOŁAWCZA (TRIGGER) ---
+
 
     def trigger_item(self, item: Dict[str, Any]) -> None:
         name = item['name']
-
-        # Globalna obsługa przycisku 'back', aby nie powielać jej w każdym handlerze
         if name == 'back':
             self._go_back()
             return
 
-        # Wybór odpowiedniego handlera na podstawie stanu (Dispatch)
         handler = self.state_handlers.get(self.state)
 
         if handler:
@@ -195,8 +178,6 @@ class UpgradeMenu:
         slot = data.slot
         is_equipped = (self.player.inventory.get(slot) == name)
 
-        # Logika toggle (zdejmij jeśli założone, załóż jeśli nie)
-        # Chyba że to ciało (body) - nie można zdjąć całkowicie, wraca do 'Leather'
         if is_equipped and not force_equip:
             if slot == 'body':
                 self.player.inventory['body'] = 'Leather'
@@ -205,17 +186,13 @@ class UpgradeMenu:
         else:
             self.player.inventory[slot] = name
 
-            # Logika konfliktu Łuk <-> Tarcza
             if slot == 'shield' and self.player.inventory['weapon'] == 'bow':
                 self.player.inventory['weapon'] = 'short_sword'
                 self.player.update_weapon_graphics()
 
         self.player.update_armor_graphics()
 
-    # --- GETTERY DANYCH UI ---
-
     def get_current_options(self) -> List[Dict[str, Any]]:
-        # Prosta mapa zwracająca opcje w zależności od stanu
         options_map = {
             'main': self.menu_options,
             'stats': self.stats_options,
@@ -229,7 +206,6 @@ class UpgradeMenu:
         return options
 
     def _get_weapon_options(self) -> List[Dict[str, Any]]:
-        # Generowanie dynamiczne
         options = [{'name': key, 'type': 'item'} for key in WEAPONS.keys()]
         options.append({'name': 'buy_arrows', 'type': 'item'})
         options.append({'name': 'back', 'label': '<<< BACK', 'type': 'nav'})
@@ -267,7 +243,6 @@ class UpgradeMenu:
 
         options = self.get_current_options()
 
-        # Obsługa myszy
         for index, rect in self.option_rects:
             if rect.collidepoint(mouse_pos):
                 if self.selection_index != index:
@@ -279,7 +254,6 @@ class UpgradeMenu:
                     self.can_click = False
                     self.click_time = pygame.time.get_ticks()
 
-        # Obsługa klawiatury (nawigacja)
         if self.can_click:
             if keys[pygame.K_UP]:
                 self._change_selection(-1, len(options))
@@ -295,7 +269,6 @@ class UpgradeMenu:
                     self._close_game_menu()  # Escape w menu głównym też może zamykać
                 self._lock_input()
 
-        # Cooldown na input
         if not self.can_click:
             if pygame.time.get_ticks() - self.click_time > 200:
                 self.can_click = True
@@ -310,20 +283,12 @@ class UpgradeMenu:
         self.click_time = pygame.time.get_ticks()
 
     def display(self) -> None:
-        # ... (Tu logika rysowania pozostaje w dużej mierze bez zmian wizualnych,
-        # więc dla oszczędności miejsca wklejam tylko jeśli potrzebujesz,
-        # ale zakładam, że rysowanie chcesz zachować takie samo) ...
-        # Jedyne co warto zmienić to pobieranie opcji przez get_current_options()
-
         self.option_rects.clear()
-
-        # Tło
         overlay = pygame.Surface((WIDTH, HEIGHT))
         overlay.set_alpha(210)
         overlay.fill(BLACK)
         self.display_surface.blit(overlay, (0, 0))
 
-        # Statystyki
         total_atk, total_def = self.calculate_total_stats()
         self.draw_text(f"HP: {self.player.stats['health']}", (255, 100, 100), 50, 50)
         self.draw_text(f"DMG: {total_atk}", (255, 100, 0), WIDTH // 4 + 50, 50)
@@ -334,13 +299,11 @@ class UpgradeMenu:
 
         pygame.draw.line(self.display_surface, (100, 100, 100), (0, 90), (WIDTH, 90), 2)
 
-        # Tytuł
         title_map = {'main': "MAIN MENU", 'stats': "UPGRADES", 'weapon': "WEAPON SHOP", 'armor': "ARMOR SHOP"}
         title = title_map.get(self.state, "")
         title_surf = self.font.render(title, True, (150, 150, 150))
         self.display_surface.blit(title_surf, (WIDTH // 2 - title_surf.get_width() // 2, 120))
 
-        # Opcje
         options = self.get_current_options()
         for index, item in enumerate(options):
             self._draw_option(index, item, index == self.selection_index)
@@ -350,8 +313,6 @@ class UpgradeMenu:
         label = item.get('label', name)
         color = (255, 255, 255)
         suffix = ""
-
-        # Logika kolorowania i suffixów (można by też wydzielić, ale dla display jest ok)
         if self.state == 'weapon':
             if name == 'buy_arrows':
                 label = f"ARROWS (+{ARROW_BUNDLE})"

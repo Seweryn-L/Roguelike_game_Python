@@ -15,10 +15,9 @@ class Enemy(Entity):
                  obstacles: pygame.sprite.Group, player: Any, coin_group: pygame.sprite.Group,
                  enemy_name: str) -> None:
         super().__init__(groups)
-
         self.all_sprites_ref = groups[0]
-
         enemy_info = ENEMY_DATA.get(enemy_name, ENEMY_DATA['ghoul'])
+        self.gold_drop = enemy_info.gold_drop
 
         try:
             full_image = pygame.image.load(enemy_info.image).convert_alpha()
@@ -111,7 +110,7 @@ class Enemy(Entity):
         if self.health <= 0:
             if self.death_sound:
                 self.death_sound.play()
-            Coin([self.all_sprites_ref, self.coin_group], self.rect.center)
+            Coin([self.all_sprites_ref, self.coin_group], self.rect.center, self.gold_drop)
             self.kill()
 
     def check_hit_cooldown(self) -> None:
