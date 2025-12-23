@@ -1,153 +1,161 @@
-WIDTH = 1280
-HEIGHT = 720
-FPS = 60
-TITLE = "Knight vs Sceletors"
-MAP1 = "level1.tmx"
+from dataclasses import dataclass
+from typing import Tuple, Dict, Final
 
-MAIN_FONT = 'fonts/Ac437_IBM_BIOS.ttf'
-PLAYER_CHARACTER = "sprites/character/Spritesheet/roguelikeChar_transparent.png"
-BLACK = (0, 0, 0)
-DARK_GREY = (40, 40, 40)
+WIDTH: Final[int] = 1280
+HEIGHT: Final[int] = 720
+FPS: Final[int] = 60
+TITLE: Final[str] = "Knight vs Sceletors"
+DEFAULT_MAP: Final[str] = "level2.tmx"
 
-ORIGINAL_TILE_SIZE = 16
-SCALE_FACTOR = 3
-TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE_FACTOR
+MAIN_FONT: Final[str] = 'fonts/Ac437_IBM_BIOS.ttf'
+PLAYER_CHARACTER: Final[str] = "sprites/character/Spritesheet/roguelikeChar_transparent.png"
 
-MAP_WIDTH = 4000
-MAP_HEIGHT = 4000
-
-PLAYER_START_POS = (400, 400)
-PLAYER_SIZE = 16
-
-HAND_POS = {
-    'left': (0, 0),
-    'right': (32, 0),
+DOOR_CONFIG = {
+    'left': {
+        'open': (28, 8),
+        'closed': (28, 7)
+    },
+    'right': {
+        'open': (29, 8),
+        'closed': (29, 7)
+    }
 }
 
-PLAYER_ASSETS = {
-    'body': (0, 0)
+BLACK: Final[Tuple[int, int, int]] = (0, 0, 0)
+DARK_GREY: Final[Tuple[int, int, int]] = (40, 40, 40)
+
+ORIGINAL_TILE_SIZE: Final[int] = 16
+SCALE_FACTOR: Final[int] = 3
+TILE_SIZE: Final[int] = ORIGINAL_TILE_SIZE * SCALE_FACTOR
+
+MAP_WIDTH: int = 4000
+MAP_HEIGHT: int = 4000
+
+PLAYER_START_POS: Tuple[int, int] = (400, 400)
+
+ARROW_COST: int = 50
+ARROW_BUNDLE: int = 10
+BOW_INITIAL_ARROWS: int = 20
+
+
+@dataclass(frozen=True)
+class WeaponData:
+    name: str
+    damage: int
+    cost: int
+    range: int
+    id: Tuple[int, int]
+    graphic_path: str = PLAYER_CHARACTER
+    flip_horizontal: bool = False
+    scale: float = SCALE_FACTOR
+    offset: Tuple[int, int] = (0, 0)
+    rotates_to_mouse: bool = False
+
+@dataclass(frozen=True)
+class ArmorData:
+    name: str
+    defense: int
+    cost: int
+    slot: str
+    id: Tuple[int, int]
+    graphic_path: str = PLAYER_CHARACTER
+
+@dataclass(frozen=True)
+class EnemyData:
+    health: int
+    damage: int
+    attack_type: str
+    speed: int
+    resistance: int
+    attack_radius: int
+    notice_radius: int
+    attack_cooldown: int
+    image: str
+    projectile_type: str = 'None'
+
+@dataclass(frozen=True)
+class ProjectileData:
+    damage: int
+    speed: int
+    image: str
+    id: Tuple[int, int]
+    lifetime: int
+    scale: float = SCALE_FACTOR
+
+WEAPONS: Dict[str, WeaponData] = {
+    'short_sword': WeaponData('short sword', 1, 100, 1, (45, 7)),
+    'axe': WeaponData('axe', 2, 200, 1, (48, 7)),
+    'long_sword': WeaponData('long sword', 5, 500, 2, (45, 6)),
+    'pique': WeaponData('pique', 5, 1000, 3, (47, 5)),
+    'bow' : WeaponData('bow',20,1000,-1,(0,0 ),"sprites/Bow and Arrows.png", scale=2, offset=(8,8),rotates_to_mouse=True)
 }
+
+PROJECTILES: Dict[str, ProjectileData] = {
+    'arrow': ProjectileData(
+        damage=15,
+        speed=600,
+        image="sprites/Bow and Arrows.png",
+        id=(2, 1),
+        lifetime=3000,
+        scale=1.5,
+    ),
+    'venom': ProjectileData(
+        damage=10,
+        speed=400,
+        image="sprites/venom_red.png",
+        id=(0, 0),
+        lifetime=3000,
+        scale=1.5,
+    )
+}
+
+ARMORS: Dict[str, ArmorData] = {
+    'Leather': ArmorData('Leather Armor', 5, 0, 'body', (6, 0)),
+    'steel': ArmorData('Steel Armor', 10, 300, 'body', (12, 4)),
+    'helmet': ArmorData('Helmet', 5, 600, 'head', (30, 0)),
+    'shield': ArmorData('Shield', 15, 1500, 'shield', (40, 0))
+}
+
+ENEMY_DATA: Dict[str, EnemyData] = {
+    'ghoul': EnemyData(100, 20, 'slash', 150, 3, 60, 400, 1000, 'sprites/SandGhoul.gif'),
+    'skeleton': EnemyData(
+        health=50,
+        damage=10,
+        attack_type='projectile',
+        speed=100,
+        resistance=1,
+        attack_radius=250,
+        notice_radius=500,
+        attack_cooldown=2000,
+        image='sprites/BrittleArcher.gif',
+        projectile_type='arrow'
+    ),
+    'ghastlyEye': EnemyData(
+        health=20,
+        damage=5,
+        attack_type='projectile',
+        speed=150,
+        resistance=1,
+        attack_radius=250,
+        notice_radius=700,
+        attack_cooldown=1000,
+        image='sprites/GhastlyEye.gif',
+        projectile_type='venom'
+    )
+}
+
 LAYERS = {
     'floor': 0,
-    'main': 1
+    'main': 1,
+    'overhead_always': 2,
+    'doors': 3
 }
 
-WEAPONS = {
-    'short_sword': {
-        'name': 'short sword',
-        'damage': 1,
-        'cost': 100,
-        'range': 1,
-        'id': (45, 7)
-    },
-    'axe': {
-        'name': 'axe',
-        'damage': 2,
-        'range': 1,
-        'cost': 200,
-        'id': (48, 7)
-    },
-    'long_sword': {
-        'name': 'long sword',
-        'damage': 5,
-        'range': 1,
-        'cost': 500,
-        'id': (45, 6)
-    },
-    'pique': {
-        'name': 'pique',
-        'damage': 5,
-        'range': 2,
-        'cost': 1000,
-        'id': (47, 5)
-    }
-
+CHEST_CONFIG = {
+    'closed': (38, 10),
+    'open': (38, 11),
+    'amount': 500
 }
 
-ARMORS = {
-    'Leather': {
-        'name': 'Leather Armor',
-        'defense': 5,
-        'cost': 0,
-        'slot': 'body',
-        'id': (6, 0)
-    },
-    'steel': {
-        'name': 'Steel Armor',
-        'defense': 10,
-        'cost': 300,
-        'slot': 'body',
-        'id': (12, 4)
-    },
-    'helmet': {
-        'name': 'Helmet',
-        'defense': 5,
-        'cost': 600,
-        'slot': 'head',
-        'id': (30, 0)
-    },
-    'shield': {
-        'name': 'Shield',
-        'defense': 15,
-        'cost': 1500,
-        'slot': 'shield',
-        'id': (40, 0)
-    }
-}
-
-COIN_DATA = {
-    'amount': 100,
-    'image': 'sprites/coin.png',
-    'frames': 7,
-    'cols': 3,
-    'scale': 2,
-    'speed': 6
-}
-
-ENEMY_DATA = {
-    'ghoul': {
-        'health': 100,
-        'damage': 20,
-        'attack_type': 'slash',
-        'speed': 150,
-        'resistance': 3,
-        'attack_radius': 60,
-        'notice_radius': 400,
-        'attack_cooldown': 1000,
-        'image': 'sprites/SandGhoul.gif',
-    },
-
-    'skeleton': {
-        'health': 60,
-        'damage': 10,
-        'attack_type': 'slash',
-        'speed': 250,
-        'resistance': 1,
-        'attack_radius': 50,
-        'notice_radius': 500,
-        'attack_cooldown': 600,
-        'image': 'sprites/SandGhoul.gif',
-    },
-
-    'ogre': {
-        'health': 300,
-        'damage': 40,
-        'attack_type': 'slam',
-        'speed': 80,
-        'resistance': 5,
-        'attack_radius': 80,
-        'notice_radius': 300,
-        'attack_cooldown': 2000,
-        'image': 'basic asset pack/basic asset pack/Basic Undead Animations/Sand Ghoul/SandGhoul.gif',
-    }
-}
-
-PROJECTILE_DATA = {
-    'acid': {
-        'speed': 400,
-        'damage': 15,
-        'radius': 8,
-        'color': (50, 255, 50),
-        'lifetime': 1500
-    }
-}
+COIN_DATA = {'amount': 100, 'image': 'sprites/coin.png', 'frames': 7, 'cols': 3, 'scale': 2, 'speed': 6}
+PLAYER_ASSETS = {'body': (0, 0)}
