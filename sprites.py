@@ -639,4 +639,4 @@ class Chest(pygame.sprite.Sprite):
             FloatingText(self.groups(), self.rect.midtop, f"+{self.amount} Gold", (255, 215, 0))
 
             if hasattr(player, 'coin_sound') and player.coin_sound:
-                pass
+                player.coin_sound.play()

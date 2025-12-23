@@ -7,8 +7,8 @@ class Camera(pygame.sprite.Group):
         self.screen = pygame.display.get_surface()
         self.offset = pygame.math.Vector2(0, 0)
         self.center = (WIDTH / 2, HEIGHT / 2)
-        self.map_width = 4000
-        self.map_height = 4000
+        self.map_width = MAP_WIDTH
+        self.map_height = MAP_HEIGHT
 
     def set_limits(self, width, height):
         self.map_width = width
