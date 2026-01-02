@@ -192,12 +192,12 @@
   <object id="22" name="right" x="608" y="160"/>
  </objectgroup>
  <objectgroup id="8" name="Chest">
-  <object id="23" name="chest" x="604" y="56"/>
+  <object id="23" name="chest" x="576" y="76"/>
   <object id="24" name="chest" x="36" y="328"/>
-  <object id="25" name="chest" x="764" y="320"/>
-  <object id="26" name="chest" x="916" y="264"/>
-  <object id="27" name="chest" x="912" y="572"/>
+  <object id="25" name="chest" x="736" y="300"/>
+  <object id="26" name="chest" x="884" y="256"/>
+  <object id="27" name="chest" x="888" y="568"/>
   <object id="28" name="chest" x="352" y="416"/>
-  <object id="29" name="special_chest" x="48" y="416"/>
+  <object id="29" name="special_chest" x="72" y="436"/>
  </objectgroup>
 </map>

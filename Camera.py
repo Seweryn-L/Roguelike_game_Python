@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from Settings import *
 
 class Camera(pygame.sprite.Group):
     def __init__(self):

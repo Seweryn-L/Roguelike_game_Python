@@ -18,7 +18,7 @@ class Entity(pygame.sprite.Sprite):
         self.hitbox: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
         self.obstacle_sprites: Optional[pygame.sprite.Group] = None
-
+    #normalizacja wektora i obliczanie liczby klatek na sekunde
     def move(self, dt: float) -> None:
         if self.velocity.magnitude() > 0:
             self.velocity = self.velocity.normalize() * self.speed
@@ -32,7 +32,7 @@ class Entity(pygame.sprite.Sprite):
         self.collision('vertical')
 
         self.rect.center = self.hitbox.center
-
+    #odpowiada za kolizje, pozwala na slizganie sie postaci po scianie
     def collision(self, direction: str) -> None:
         if self.obstacle_sprites is None:
             return

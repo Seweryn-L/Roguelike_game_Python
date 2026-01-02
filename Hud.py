@@ -1,7 +1,7 @@
 import pygame
-from settings import *
-from support import load_font
-from sprites import Player
+from Settings import *
+from Support import load_font
+from Sprites import Player, WEAPONS, ARMORS
 
 
 class HUD:

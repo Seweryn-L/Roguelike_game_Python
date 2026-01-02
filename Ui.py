@@ -1,10 +1,10 @@
-from typing import List, Any, Callable, Optional
+from typing import List, Any, Callable, Optional, Dict
 from functools import partial
 
-from settings import *
-from support import load_font
-from sprites import Player
-
+from Settings import *
+from Support import load_font
+from Sprites import Player, WEAPONS, ARMORS
+import pygame
 
 class UpgradeMenu:
     def __init__(self, player: Player) -> None:
@@ -39,6 +39,7 @@ class UpgradeMenu:
             {'name': 'back', 'cost': 0, 'increase': 0, 'label': '<<< BACK'}
         ]
 
+        #tworzenie slownikow mapujace nazwy stanow
         self._init_dispatch_tables()
 
     def _load_audio(self) -> None:
@@ -52,6 +53,7 @@ class UpgradeMenu:
         except Exception as e:
             print(f"UI Sound Error: {e}")
 
+    #slowniki stanow
     def _init_dispatch_tables(self) -> None:
         self.state_handlers: Dict[str, Callable[[str, Dict[str, Any]], None]] = {
             'main': self._handle_main_state,
@@ -70,7 +72,7 @@ class UpgradeMenu:
             'attack': lambda inc: self._modify_stat_dict('attack', inc),
             'speed': lambda inc: self._modify_attribute('speed', inc),
         }
-
+    #zmiana stanow
     def _switch_state(self, new_state: str) -> None:
         self.state = new_state
         self.selection_index = 0
@@ -86,11 +88,12 @@ class UpgradeMenu:
     def _modify_stat_dict(self, key: str, amount: int) -> None:
         self.player.stats[key] += amount
 
+    #zmiana wartosci predkosci itd.. w player
     def _modify_attribute(self, attr_name: str, amount: int) -> None:
         if hasattr(self.player, attr_name):
             current_val = getattr(self.player, attr_name)
             setattr(self.player, attr_name, current_val + amount)
-
+    #czy stac na zakup
     def _try_buy(self, cost: int) -> bool:
         if self.player.money >= cost:
             self.player.money -= cost
@@ -100,17 +103,15 @@ class UpgradeMenu:
             if self.error_sound: self.error_sound.play()
             return False
 
-
-
+    #wskazywanie na element
     def trigger_item(self, item: Dict[str, Any]) -> None:
         name = item['name']
         if name == 'back':
             self._go_back()
             return
-
         handler = self.state_handlers.get(self.state)
-
         if handler:
+            #z ktorego menu i jaka zakladke wyswietlic
             handler(name, item)
         else:
             print(f"Warning: No handler for state {self.state}")
@@ -212,7 +213,6 @@ class UpgradeMenu:
         return options
 
     def _get_armor_options(self) -> List[Dict[str, Any]]:
-        # Generowanie dynamiczne
         options = [{'name': key, 'type': 'item'} for key in ARMORS.keys() if key != 'Leather']
         options.append({'name': 'back', 'label': '<<< BACK', 'type': 'nav'})
         return options

@@ -1,15 +1,55 @@
 import pygame
-from typing import List, Any
+from typing import List, Any, Dict, Tuple
+from dataclasses import dataclass
+from Entity import Entity
+from Settings import *
+from Sprites import Coin, Player, Projectile, PROJECTILES
 
-from entity import Entity
-from settings import *
+
+@dataclass(frozen=True)
+class EnemyData:
+    health: int
+    damage: int
+    attack_type: str
+    speed: int
+    resistance: int
+    attack_radius: int
+    notice_radius: int
+    attack_cooldown: int
+    image: str
+    gold_drop: int
+    projectile_type: str = 'None'
+    spawn_weigt: int = 10
 
 
-from sprites import Coin, Player, Projectile
-
+ENEMY_DATA: Dict[str, EnemyData] = {
+    'ghoul': EnemyData(
+        health=60, damage=15, attack_type='slash', speed=160, resistance=3,
+        attack_radius=60, notice_radius=400, attack_cooldown=1000,
+        image='sprites/SandGhoul.gif',
+        gold_drop=40,
+        projectile_type='None',
+        spawn_weigt=15
+    ),
+    'skeleton': EnemyData(
+        health=40, damage=10, attack_type='projectile', speed=110, resistance=1,
+        attack_radius=250, notice_radius=550, attack_cooldown=2000,
+        image='sprites/BrittleArcher.gif',
+        gold_drop=50,
+        projectile_type='arrow',
+        spawn_weigt=35
+    ),
+    'ghastlyEye': EnemyData(
+        health=30, damage=5, attack_type='projectile', speed=140, resistance=1,
+        attack_radius=250, notice_radius=700, attack_cooldown=1000,
+        image='sprites/GhastlyEye.gif',
+        gold_drop=30,
+        projectile_type='venom',
+        spawn_weigt=50
+    )
+}
 
 class Enemy(Entity):
-
 
     def __init__(self, groups: List[pygame.sprite.Group], pos: Tuple[int, int],
                  obstacles: pygame.sprite.Group, player: Any, coin_group: pygame.sprite.Group,

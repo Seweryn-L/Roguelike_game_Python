@@ -1,15 +1,16 @@
+import pygame
 import random
 import sys
 import pytmx
-from typing import Optional, Callable, List
+from typing import Optional, Callable, List, Dict
 
-from settings import *
-from support import load_font, SpriteSheet
+from Settings import *
+from Support import load_font, SpriteSheet
 from Camera import Camera
-from ui import UpgradeMenu
-from enemy import Enemy
-from hud import HUD
-from sprites import Player, Wall, Tile, FloatingText, Door, Chest
+from Ui import UpgradeMenu
+from Enemy import Enemy, ENEMY_DATA
+from Hud import HUD
+from Sprites import Player, Wall, Tile, FloatingText, Door, Chest, CHEST_CONFIG
 
 
 class Game:
@@ -213,20 +214,20 @@ class Game:
     def _on_normal_chest_open(self, player, pos_rect: Tuple[int, int], groups: List[pygame.sprite.Group]) -> None:
         amount = CHEST_CONFIG['amount']
         player.money += amount
-        FloatingText(groups, pos_rect, f"+{amount} Gold", GOLD_COLOR)
+        FloatingText([self.all_sprites], pos_rect, f"+{amount} Gold", GOLD_COLOR)
 
     def _on_special_chest_open(self, player, pos_rect: Tuple[int, int], groups: List[pygame.sprite.Group]) -> None:
-
         self.victory = True
 
-    def spawn_enemies_randomly(self, grid_x: int, grid_y: int, pos: tuple[int,int]) -> None:
-        if random.randint(0, 100) < 2:
+    def spawn_enemies_randomly(self, grid_x: int, grid_y: int, pos: tuple[int, int]) -> None:
+        if random.randint(0, 100) < 2:  # Zostawiamy Twoje 2% szansy na spawn w ogóle
             dist_x = abs(grid_x * TILE_SIZE - WIDTH / 2)
             dist_y = abs(grid_y * TILE_SIZE - HEIGHT / 2)
 
             if dist_x > 500 or dist_y > 500:
-                available_enemies = list(ENEMY_DATA.keys())
-                enemy_name = random.choice(available_enemies)
+                enemy_names = list(ENEMY_DATA.keys())
+                weights = [ENEMY_DATA[name].spawn_weigt for name in enemy_names]
+                enemy_name = random.choices(enemy_names, weights=weights, k=1)[0]
 
                 Enemy(
                     groups=[self.all_sprites, self.enemy_sprites, self.player_obstacles],

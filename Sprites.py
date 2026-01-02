@@ -1,9 +1,99 @@
 import pygame
-from typing import List, Optional, Union, Sequence, Callable
+from typing import List, Optional, Union, Sequence, Callable, Dict
+from Settings import *
+from Entity import Entity
+from Support import SpriteSheet
+from dataclasses import dataclass
 
-from settings import *
-from entity import Entity
-from support import SpriteSheet
+
+@dataclass(frozen=True)
+class WeaponData:
+    name: str
+    damage: int
+    cost: int
+    range: int
+    id: Tuple[int, int]
+    graphic_path: str = PLAYER_CHARACTER
+    flip_horizontal: bool = False
+    scale: float = SCALE_FACTOR
+    offset: Tuple[int, int] = (0, 0)
+    rotates_to_mouse: bool = False
+
+@dataclass(frozen=True)
+class ArmorData:
+    name: str
+    defense: int
+    cost: int
+    slot: str
+    id: Tuple[int, int]
+    graphic_path: str = PLAYER_CHARACTER
+
+@dataclass(frozen=True)
+class ProjectileData:
+    damage: int
+    speed: int
+    image: str
+    id: Tuple[int, int]
+    lifetime: int
+    scale: float = SCALE_FACTOR
+
+WEAPONS: Dict[str, WeaponData] = {
+    'short_sword': WeaponData('short sword', 1, 0, 1, (45, 7)),
+    'axe': WeaponData('axe', 3, 250, 1, (48, 7)),
+    'long_sword': WeaponData('long sword', 6, 600, 2, (45, 6)),
+    'pique': WeaponData('pique', 5, 1200, 3, (47, 5)),
+    'bow': WeaponData(
+        name='bow', damage=12, cost=1500, range=-1,
+        id=(0, 0), graphic_path="sprites/Bow and Arrows.png",
+        scale=2, offset=(8, 8), rotates_to_mouse=True
+    )
+}
+
+PROJECTILES: Dict[str, ProjectileData] = {
+    'arrow': ProjectileData(
+        damage=15,
+        speed=600,
+        image="sprites/Bow and Arrows.png",
+        id=(2, 1),
+        lifetime=3000,
+        scale=1.5,
+    ),
+    'venom': ProjectileData(
+        damage=10,
+        speed=400,
+        image="sprites/venom_red.png",
+        id=(0, 0),
+        lifetime=3000,
+        scale=1.5,
+    )
+}
+
+ARMORS: Dict[str, ArmorData] = {
+    'Leather': ArmorData('Leather Armor', 0, 150, 'body', (6, 0)),
+    'steel': ArmorData('Steel Armor', 5, 800, 'body', (12, 4)),
+    'helmet': ArmorData('Helmet', 5, 400, 'head', (30, 0)),
+    'shield': ArmorData('Shield', 10, 1000, 'shield', (40, 0))
+}
+
+DOOR_CONFIG = {
+    'left': {'open': (28, 8), 'closed': (28, 7)},
+    'right': {'open': (29, 8), 'closed': (29, 7)}
+}
+
+CHEST_CONFIG = {
+    'closed': (38, 10),
+    'open': (38, 11),
+    'amount': 500
+}
+
+COIN_DATA = {
+    'amount': 100,
+    'image': 'sprites/coin.png',
+    'frames': 7,
+    'cols': 3,
+    'scale': 2,
+    'speed': 6
+}
 
 
 def get_input_direction(keys: pygame.key.ScancodeWrapper) -> pygame.math.Vector2:
@@ -20,7 +110,6 @@ def get_input_direction(keys: pygame.key.ScancodeWrapper) -> pygame.math.Vector2
     if direction.length() > 0:
         return direction.normalize()
     return direction
-
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, group: Union[pygame.sprite.Group, List], pos: Tuple[int, int], surface: pygame.Surface) -> None:
@@ -83,7 +172,8 @@ class Player(Entity):
         self.enemy_group: Optional[pygame.sprite.Group] = None
         self.can_shoot: bool = True
         self.shoot_time: int = 0
-        self.shoot_cooldown: int = 400
+        self.shoot_cooldown: int = 200
+        self.mouse_pressed_handled: bool = False
 
         self.sprite_sheet = SpriteSheet(PLAYER_CHARACTER)
         self.base_body_img = self.sprite_sheet.get_image(*PLAYER_ASSETS['body'], scale=SCALE_FACTOR)
@@ -110,10 +200,10 @@ class Player(Entity):
 
         self.rect = self.image.get_rect(center=PLAYER_START_POS)
         self.hitbox = self.rect.inflate(-10, -26)
-        self.speed = 200
+        self.speed = 250
         self.pos = pygame.math.Vector2(PLAYER_START_POS)
-        self.money: int = 0
-        self.stats: Dict[str, int] = {'health': 100, 'attack': 9, 'speed': 300}
+        self.money: int = 10000
+        self.stats: Dict[str, int] = {'health': 100, 'attack': 19, 'speed': self.speed}
         self.vulnerable: bool = True
         self.hurt_time: int = 0
         self.invincibility_duration: int = 500
@@ -136,30 +226,51 @@ class Player(Entity):
         if not self.can_shoot:
             return
 
+        mouse_buttons = pygame.mouse.get_pressed()
         keys = pygame.key.get_pressed()
-        mouse_pressed = pygame.mouse.get_pressed()
-        weapon_name = self.inventory['weapon']
 
-        if mouse_pressed[0] and weapon_name == 'bow':
-            if self.ammo['arrow'] > 0:
-                self.ammo['arrow'] -= 1
-                self.arrow_sound.play()
+
+        if not mouse_buttons[0]:
+            self.mouse_pressed_handled = False
+
+        if mouse_buttons[0] and not self.mouse_pressed_handled and self.can_shoot:
+            self.mouse_pressed_handled = True
+            weapon_name = self.inventory['weapon']
+
+            if weapon_name == 'bow':
+                if self.ammo['arrow'] > 0:
+                    self.ammo['arrow'] -= 1
+                    self.arrow_sound.play()
+                    self.can_shoot = False
+                    self.shoot_time = pygame.time.get_ticks()
+
+                    mouse_pos_screen = pygame.mouse.get_pos()
+                    camera_offset = pygame.math.Vector2(0, 0)
+                    if hasattr(self.display_group, 'offset'):
+                        camera_offset = self.display_group.offset
+                    mouse_pos_world = pygame.math.Vector2(mouse_pos_screen) + camera_offset
+
+                    direction_vector = mouse_pos_world - self.pos
+                    if direction_vector.length() > 0:
+                        direction = direction_vector.normalize()
+                        target_group = self.enemy_group if self.enemy_group else pygame.sprite.Group()
+                        Projectile(self.rect.center, direction, [self.display_group], self.obstacle_sprites,
+                                   target_group,
+                                   PROJECTILES['arrow'])
+            elif weapon_name != 'bow':
                 self.can_shoot = False
                 self.shoot_time = pygame.time.get_ticks()
 
-                mouse_pos_screen = pygame.mouse.get_pos()
-                camera_offset = pygame.math.Vector2(0, 0)
-                if hasattr(self.display_group, 'offset'):
-                    camera_offset = self.display_group.offset
-                mouse_pos_world = pygame.math.Vector2(mouse_pos_screen) + camera_offset
+                self.hit = True
+                if self.attack_sound:
+                    self.attack_sound.play()
 
-                direction_vector = mouse_pos_world - self.pos
-                if direction_vector.length() > 0:
-                    direction = direction_vector.normalize()
-                    target_group = self.enemy_group if self.enemy_group else pygame.sprite.Group()
-                    Projectile(self.rect.center, direction, [self.display_group], self.obstacle_sprites,
-                               target_group,
-                               PROJECTILES['arrow'])
+                if self.enemy_group:
+                    effective_range = self.get_effective_range()
+                    for enemy in self.enemy_group:
+                        distance = enemy.pos.distance_to(self.pos)
+                        if distance < effective_range:
+                            enemy.get_damage(self)
 
         elif keys[pygame.K_SPACE]:
             self.can_shoot = False
@@ -177,20 +288,7 @@ class Player(Entity):
                 chests_hit[0].open(self)
                 return
 
-        elif mouse_pressed[0] and weapon_name != 'bow':
-            self.can_shoot = False
-            self.shoot_time = pygame.time.get_ticks()
 
-            self.hit = True
-            if self.attack_sound:
-                self.attack_sound.play()
-
-            if self.enemy_group:
-                effective_range = self.get_effective_range()
-                for enemy in self.enemy_group:
-                    distance = enemy.pos.distance_to(self.pos)
-                    if distance < effective_range:
-                        enemy.get_damage(self)
 
     def set_enemy_group(self, enemy_group: pygame.sprite.Group) -> None:
         self.enemy_group = enemy_group
