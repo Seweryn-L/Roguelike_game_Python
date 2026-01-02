@@ -95,6 +95,8 @@ COIN_DATA = {
     'speed': 6
 }
 
+START_MONEY = 0
+
 
 def get_input_direction(keys: pygame.key.ScancodeWrapper) -> pygame.math.Vector2:
     direction = pygame.math.Vector2(0, 0)
@@ -202,7 +204,7 @@ class Player(Entity):
         self.hitbox = self.rect.inflate(-10, -26)
         self.speed = 250
         self.pos = pygame.math.Vector2(PLAYER_START_POS)
-        self.money: int = 10000
+        self.money: int = START_MONEY
         self.stats: Dict[str, int] = {'health': 100, 'attack': 19, 'speed': self.speed}
         self.vulnerable: bool = True
         self.hurt_time: int = 0
@@ -228,7 +230,6 @@ class Player(Entity):
 
         mouse_buttons = pygame.mouse.get_pressed()
         keys = pygame.key.get_pressed()
-
 
         if not mouse_buttons[0]:
             self.mouse_pressed_handled = False
