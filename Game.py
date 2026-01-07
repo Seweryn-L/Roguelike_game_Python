@@ -185,7 +185,7 @@ class Game:
             'left': self._create_door,
             'right': self._create_door,
             'chest': self._create_chest,
-            'special_chest': self._create_special_chest  # <--- NOWY WPIS
+            'special_chest': self._create_special_chest
         }
         for layer in tmx_data.visible_layers:
             # --- Obsługa Warstw Kafelkowych ---
