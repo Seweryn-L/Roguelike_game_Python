@@ -220,7 +220,7 @@ class Game:
         self.victory = True
 
     def spawn_enemies_randomly(self, grid_x: int, grid_y: int, pos: tuple[int, int]) -> None:
-        if random.randint(0, 100) < 2:  # Zostawiamy Twoje 2% szansy na spawn w ogóle
+        if random.randint(0, 400) < 10:
             dist_x = abs(grid_x * TILE_SIZE - WIDTH / 2)
             dist_y = abs(grid_y * TILE_SIZE - HEIGHT / 2)
 

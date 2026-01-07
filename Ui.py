@@ -33,9 +33,9 @@ class UpgradeMenu:
         ]
 
         self.stats_options: List[Dict[str, Any]] = [
-            {'name': 'health', 'cost': 50, 'increase': 20, 'label': 'Heal (+20 HP)'},
-            {'name': 'attack', 'cost': 100, 'increase': 2, 'label': 'Strength (+2 Atk)'},
-            {'name': 'speed', 'cost': 80, 'increase': 20, 'label': 'Speed (+20 Speed)'},
+            {'name': 'health', 'cost': 100, 'increase': 20, 'label': 'Heal (+20 HP)'},
+            {'name': 'attack', 'cost': 200, 'increase': 2, 'label': 'Strength (+2 Atk)'},
+            {'name': 'speed', 'cost': 100, 'increase': 20, 'label': 'Speed (+20 Speed)'},
             {'name': 'back', 'cost': 0, 'increase': 0, 'label': '<<< BACK'}
         ]
 
