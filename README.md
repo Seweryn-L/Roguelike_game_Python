@@ -22,16 +22,16 @@ To run **Knight vs Sceletors**, follow these steps:
 1. **Clone the repository**
    ```bash
    git clone https://github.com/Seweryn-L/Roguelike_game_Python
-   cd projektGTI_HUB
+   cd Roguelike_game_Python
 2. **Install Python**: Ensure you have Python 3.8 or later installed. You can download it from python.org.
 
 3. **Install Pygame**: Install the Pygame library using pip.
     ```bash
     pip install pygame
+    pip install pytmx
 
 4. **Run the Game**: Navigate to the project directory and run the Main.py file.
     ```bash
-    cd Main.py
     python Main.py
 
 ## How to Play

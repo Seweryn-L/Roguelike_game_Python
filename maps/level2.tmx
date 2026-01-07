@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="30">
- <tileset firstgid="1" source="maps/mapka nice.tsx"/>
+ <tileset firstgid="1" source="../PROJEKT OSTATECZNY/mapka nice.tsx"/>
  <layer id="3" name="Floor" width="60" height="40">
   <data encoding="csv">
 178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,178,
