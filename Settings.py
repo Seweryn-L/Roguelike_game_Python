@@ -41,5 +41,5 @@ ARROW_BUNDLE: int = 10
 BOW_INITIAL_ARROWS: int = 20
 
 
-VICTORY_TEXT: Final[str] = "WYGRALES 5 z PJF"
+VICTORY_TEXT: Final[str] = "YOU WIN!!!"
 GOLD_COLOR: Final[Tuple[int, int, int]] = (255, 215, 0)
