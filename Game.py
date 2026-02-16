@@ -226,7 +226,7 @@ class Game:
 
             if dist_x > 500 or dist_y > 500:
                 enemy_names = list(ENEMY_DATA.keys())
-                weights = [ENEMY_DATA[name].spawn_weigt for name in enemy_names]
+                weights = [ENEMY_DATA[name].spawn_weight for name in enemy_names]
                 enemy_name = random.choices(enemy_names, weights=weights, k=1)[0]
 
                 Enemy(

@@ -19,7 +19,7 @@ class EnemyData:
     image: str
     gold_drop: int
     projectile_type: str = 'None'
-    spawn_weigt: int = 10
+    spawn_weight: int = 10
 
 
 ENEMY_DATA: Dict[str, EnemyData] = {
@@ -29,7 +29,7 @@ ENEMY_DATA: Dict[str, EnemyData] = {
         image='sprites/SandGhoul.gif',
         gold_drop=40,
         projectile_type='None',
-        spawn_weigt=15
+        spawn_weight=15
     ),
     'skeleton': EnemyData(
         health=40, damage=10, attack_type='projectile', speed=110, resistance=1,
@@ -37,7 +37,7 @@ ENEMY_DATA: Dict[str, EnemyData] = {
         image='sprites/BrittleArcher.gif',
         gold_drop=50,
         projectile_type='arrow',
-        spawn_weigt=35
+        spawn_weight=35
     ),
     'ghastlyEye': EnemyData(
         health=30, damage=5, attack_type='projectile', speed=140, resistance=1,
@@ -45,7 +45,7 @@ ENEMY_DATA: Dict[str, EnemyData] = {
         image='sprites/GhastlyEye.gif',
         gold_drop=30,
         projectile_type='venom',
-        spawn_weigt=50
+        spawn_weight=50
     )
 }
 
