@@ -169,7 +169,7 @@ class Game:
         map_pixel_height: int = tmx_data.height * TILE_SIZE
         self.all_sprites.set_limits(map_pixel_width, map_pixel_height)
 
-        map_spritesheet: SpriteSheet = SpriteSheet("rpg pack/Spritesheet/roguelikeSheet_transparent.png")
+        map_spritesheet: SpriteSheet = SpriteSheet("rpg_pack/Spritesheet/roguelikeSheet_transparent.png")
 
         tile_handler = Callable[[Tuple[int, int], pygame.Surface, int, int], None]
         object_handler = Callable[[pytmx.TiledObject, Tuple[int, int], SpriteSheet], None]
